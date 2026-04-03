@@ -13,6 +13,7 @@ import os
 from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from openenv.core.env_server.http_server import HTTPEnvServer
@@ -63,6 +64,7 @@ class StepBody(BaseModel):
 # ---------------------------------------------------------------------------
 
 def create_app() -> FastAPI:
+    
     app = FastAPI(
         title="API Contract Debugger",
         description=(
@@ -71,6 +73,13 @@ def create_app() -> FastAPI:
         ),
         version="1.0.0",
     )
+
+    app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+)
 
     # ------------------------------------------------------------------
     # 1. Our stateful routes — registered FIRST
