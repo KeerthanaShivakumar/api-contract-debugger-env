@@ -76,6 +76,16 @@ def create_app() -> FastAPI:
     # 1. Our stateful routes — registered FIRST
     # ------------------------------------------------------------------
 
+    @app.get("/", tags=["API"])
+    async def root() -> Dict[str, str]:
+        """Root endpoint with API information."""
+        return {
+            "name": "API Contract Debugger",
+            "description": "OpenEnv environment for debugging API contracts",
+            "docs": "/docs",
+            "version": "1.0.0"
+        }
+
     @app.post("/reset", tags=["Environment"])
     async def reset(req: ResetBody = ResetBody()) -> Dict[str, Any]:
         """Reset the environment. Optionally switch task via task_name."""
