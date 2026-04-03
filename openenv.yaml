@@ -50,4 +50,4 @@ reward:
     +0.2×severity per violation fixed, -0.15×severity per violation introduced,
     -0.05 for malformed action, +0.5 bonus when all violations are resolved.
 
-hf_space: ""  # fill in your HuggingFace Space URL before submitting
+hf_space: "https://huggingface.co/spaces/keerthanas1011/api-contract-debugger.hf.space"
