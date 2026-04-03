@@ -1,3 +1,21 @@
+---
+title: API Contract Debugger
+emoji: 🔍
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+sdk_version: "1.0"
+app_file: app.py
+pinned: false
+tags:
+  - openenv
+  - rl-environment
+  - api-debugging
+  - contract-testing
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+
 # API Contract Debugger — OpenEnv Environment
 
 An OpenEnv environment where AI agents debug broken OpenAPI-style contract
