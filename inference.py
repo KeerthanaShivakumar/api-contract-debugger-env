@@ -1,15 +1,23 @@
 """
 Baseline Inference Script — API Contract Debugger
 ===================================================
-Runs a GPT model against all three tasks and emits the required
+Runs an LLM model against API contract debugging tasks and emits the required
 [START] / [STEP] / [END] log format.
 
-Environment variables:
-    API_BASE_URL   LLM endpoint  (default: https://router.huggingface.co/v1)
-    MODEL_NAME     Model ID      (default: Qwen/Qwen2.5-72B-Instruct)
-    HF_TOKEN       API key
-    ENV_BASE_URL   Running env   (default: http://localhost:7860)
-    TASK_NAME      One task or "all"  (default: all)
+MANDATORY ENVIRONMENT VARIABLES:
+    HF_TOKEN or API_KEY     Your API key for LLM access (REQUIRED - no default)
+    ENV_BASE_URL            Base URL of the environment server (REQUIRED - no default)
+    TASK_NAME               Task(s) to run: "easy", "medium", "hard", or "all" (REQUIRED - no default)
+
+OPTIONAL ENVIRONMENT VARIABLES (with defaults):
+    API_BASE_URL            LLM endpoint (default: https://router.huggingface.co/v1)
+    MODEL_NAME              Model ID (default: Qwen/Qwen2.5-72B-Instruct)
+    LOCAL_IMAGE_NAME        Docker image name (if using from_docker_image())
+
+Output Format:
+    [START] task=<task_name> env=<benchmark> model=<model_name>
+    [STEP]  step=<n> action=<action_str> reward=<0.00> done=<true|false> error=<msg|null>
+    [END]   success=<true|false> steps=<n> score=<0.000> rewards=<r1,r2,...,rn>
 """
 
 from __future__ import annotations
@@ -26,11 +34,30 @@ from openai import OpenAI
 # Configuration
 # ---------------------------------------------------------------------------
 
+# REQUIRED: Set defaults ONLY for API_BASE_URL and MODEL_NAME
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME   = os.getenv("MODEL_NAME",   "Qwen/Qwen2.5-72B-Instruct")
-API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY", "hf_placeholder")
-ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:7860").rstrip("/")
-TASK_NAME    = os.getenv("TASK_NAME", "all")
+
+# REQUIRED: HF_TOKEN for API authentication (no default)
+API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+if not API_KEY:
+    raise ValueError(
+        "API key must be provided via HF_TOKEN or API_KEY environment variable"
+    )
+
+# REQUIRED: LOCAL_IMAGE_NAME for docker image initialization (if used)
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
+
+# REQUIRED: Environment server URL (no default)
+ENV_BASE_URL = os.getenv("ENV_BASE_URL")
+if not ENV_BASE_URL:
+    raise ValueError("ENV_BASE_URL environment variable must be set")
+ENV_BASE_URL = ENV_BASE_URL.rstrip("/")
+
+# REQUIRED: Task name(s) to run (no default)
+TASK_NAME = os.getenv("TASK_NAME")
+if not TASK_NAME:
+    raise ValueError("TASK_NAME environment variable must be set")
 
 TEMPERATURE  = 0.0
 MAX_TOKENS   = 512

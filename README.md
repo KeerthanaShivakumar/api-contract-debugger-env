@@ -1,17 +1,3 @@
----
-title: API Contract Debugger
-emoji: 🔍
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 7860
-tags:
-  - openenv
-  - rl-environment
-  - api-debugging
-  - contract-testing
----
-
 # API Contract Debugger — OpenEnv Environment
 
 An OpenEnv environment where AI agents debug broken OpenAPI-style contract
@@ -129,14 +115,30 @@ Final episode score is computed by `grade_episode()` → float in `[0.0, 1.0]`.
 
 ## Setup & Usage
 
+### Installation
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd api-contract-debugger
+
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
 ### Run locally
 
 ```bash
-git clone <your-repo-url>
-cd api_contract_debugger_env
-pip install -r requirements.txt
-uvicorn server.app:app --host 0.0.0.0 --port 7860
+# Start the server
+uvicorn server.app:app --host 0.0.0.0 --port 7860 --reload
 ```
+
+The server will be available at `http://localhost:7860`
 
 ### Run with Docker
 
@@ -145,19 +147,75 @@ docker build -t api-contract-debugger .
 docker run -p 7860:7860 api-contract-debugger
 ```
 
-### Run the baseline agent
-
-```bash
-export HF_TOKEN=your_token
-export ENV_BASE_URL=http://localhost:7860
-python inference.py
-```
-
 ### Run tests
 
 ```bash
-pip install pytest httpx
+# Run entire test suite (56 tests)
 pytest tests/ -v
+
+# Run with coverage
+pytest tests/ -v --cov=server
+```
+
+### Run the baseline agent
+
+The baseline agent uses an LLM (via OpenAI client) to propose fixes.
+
+**Required environment variables** (must be set):
+```bash
+export HF_TOKEN="your_huggingface_api_token"     # Get from huggingface.co/settings/tokens
+export ENV_BASE_URL="http://localhost:7860"      # Environment server URL
+export TASK_NAME="all"                           # "easy", "medium", "hard", or "all"
+```
+
+**Optional environment variables** (have defaults):
+```bash
+export API_BASE_URL="https://router.huggingface.co/v1"      # LLM endpoint
+export MODEL_NAME="Qwen/Qwen2.5-72B-Instruct"               # Model identifier
+export LOCAL_IMAGE_NAME="optional_docker_image"             # For docker image initialization
+```
+
+Then run the agent:
+```bash
+python inference.py
+```
+
+**Example output:**
+```
+[START] task=easy env=api_contract_debugger model=Qwen/Qwen2.5-72B-Instruct
+[STEP] step=1 action={"kind":"add_field",...} reward=0.70 done=true error=null
+[END] success=true steps=1 score=1.000 rewards=0.70
+```
+
+### Test individual endpoints
+
+```bash
+# Health check
+curl http://localhost:7860/health
+
+# List available tasks
+curl http://localhost:7860/tasks
+
+# Reset to a task
+curl -X POST http://localhost:7860/reset \
+  -H "Content-Type: application/json" \
+  -d '{"task_name":"easy"}'
+
+# Apply an action
+curl -X POST http://localhost:7860/step \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": {
+      "kind": "add_field",
+      "endpoint_index": 0,
+      "location": "response_body",
+      "field_name": "created_at",
+      "new_value": {"type": "string", "description": "ISO-8601 timestamp"}
+    }
+  }'
+
+# Get final score
+curl http://localhost:7860/score
 ```
 
 ---
@@ -175,7 +233,7 @@ pytest tests/ -v
 ## Project Structure
 
 ```
-api_contract_debugger_env/
+api-contract-debugger/
 ├── server/
 │   ├── __init__.py
 │   ├── app.py          # FastAPI app, route registration
@@ -184,11 +242,27 @@ api_contract_debugger_env/
 │   ├── graders.py      # Violation detection + reward shaping
 │   └── fixtures.py     # Task definitions (broken + golden specs)
 ├── tests/
-│   └── test_env.py     # 56 tests covering all components
-├── inference.py        # Baseline agent
+│   └── test_env.py     # 56 unit tests covering all components
+├── inference.py        # Baseline LLM-powered agent
 ├── openenv.yaml        # OpenEnv metadata
-├── pyproject.toml      # Package config + server entry point
-├── requirements.txt
-├── uv.lock
-└── Dockerfile
+├── pyproject.toml      # Package configuration
+├── requirements.txt    # Python dependencies
+├── Dockerfile          # Container image configuration
+└── RL_ARCHITECTURE.md  # Complete RL framework documentation
 ```
+
+---
+
+## Documentation
+
+### RL_ARCHITECTURE.md
+Comprehensive guide to the reinforcement learning implementation:
+- **Agent** — How external AI systems interact with the environment via HTTP API
+- **Environment** — Core `APIContractDebuggerEnv` class and episode lifecycle
+- **State** — Observation space and full internal state representation
+- **Action** — All 5 action types with validation rules and examples
+- **Reward & Scoring** — Dense per-step rewards and episode grading formula
+- **Complete example episode transcript** with JSON payloads
+- **Python agent pseudocode** for custom implementations
+
+---
