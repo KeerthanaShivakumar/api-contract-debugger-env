@@ -4,7 +4,6 @@
 
 1. ✅ **inference.py** — Fixed environment variable configuration for strict compliance
 2. ✅ **RL_ARCHITECTURE.md** — Created full RL documentation 
-3. ✅ **COMPLIANCE_REPORT.md** — Detailed compliance analysis
 
 ---
 
@@ -367,7 +366,7 @@ After complete rerun, verify:
 ✅ All 56 tests pass
 ✅ `inference.py` requires environment variables (doesn't run without them)
 ✅ Agent runs and produces [START]/[STEP]/[END] logs
-✅ RL_ARCHITECTURE.md and COMPLIANCE_REPORT.md exist in repo root
+✅ RL_ARCHITECTURE.md exists in repo root
 
 ---
 
@@ -387,7 +386,6 @@ api-contract-debugger/
 │   └── test_env.py
 ├── inference.py              # ✅ NOW COMPLIANT (env vars required)
 ├── RL_ARCHITECTURE.md        # ✅ NEW: Full RL documentation
-├── COMPLIANCE_REPORT.md      # ✅ NEW: Compliance analysis
 ├── requirements.txt
 ├── pyproject.toml
 ├── Dockerfile
@@ -395,19 +393,3 @@ api-contract-debugger/
 ```
 
 ---
-
-## Documentation Added
-
-After running, you also have:
-
-1. **[RL_ARCHITECTURE.md](RL_ARCHITECTURE.md)** — Complete RL framework explanation
-   - Agent interaction pattern
-   - Environment implementation
-   - State/Action/Reward definitions
-   - Example episode transcript
-
-2. **[COMPLIANCE_REPORT.md](COMPLIANCE_REPORT.md)** — Compliance analysis
-   - 6 checks passed
-   - 3 warnings fixed
-   - 1 missing feature added
-
