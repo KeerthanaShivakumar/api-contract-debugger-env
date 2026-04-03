@@ -1,0 +1,53 @@
+name: api-contract-debugger
+version: "1.0.0"
+description: >
+  An OpenEnv environment where AI agents debug broken OpenAPI-style contract
+  specifications. The agent receives a broken API spec and must identify and
+  fix contract violations (missing fields, wrong types, wrong status codes,
+  forbidden extra fields) by proposing targeted field-level corrections.
+
+tags:
+  - api
+  - debugging
+  - contract-testing
+  - real-world
+  - nlp
+
+tasks:
+  - name: easy
+    description: "Single endpoint with one missing required response field."
+    difficulty: easy
+    max_steps: 5
+
+  - name: medium
+    description: "Three endpoints with type mismatches and a wrong HTTP status code."
+    difficulty: medium
+    max_steps: 10
+
+  - name: hard
+    description: >
+      Four endpoints with 6 violations: missing fields, wrong types,
+      wrong status code, and a forbidden extra field that must be removed.
+    difficulty: hard
+    max_steps: 15
+
+action_space:
+  type: structured
+  description: >
+    DebugAction — proposes one fix per step: add_field, remove_field,
+    change_type, change_status, or no_op.
+
+observation_space:
+  type: structured
+  description: >
+    DebugObservation — returns the current (partially fixed) endpoint specs,
+    the list of remaining violations, per-step fix counts, and reward signal.
+
+reward:
+  type: dense
+  range: [-1.0, 1.5]
+  description: >
+    +0.2×severity per violation fixed, -0.15×severity per violation introduced,
+    -0.05 for malformed action, +0.5 bonus when all violations are resolved.
+
+hf_space: ""  # fill in your HuggingFace Space URL before submitting
