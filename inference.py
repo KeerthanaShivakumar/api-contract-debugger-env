@@ -52,9 +52,7 @@ LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "https://keerthanas1011-api-contract-debugger.hf.space")
 
 # REQUIRED: Task name(s) to run (no default)
-TASK_NAME = os.getenv("TASK_NAME")
-if not TASK_NAME:
-    raise ValueError("TASK_NAME environment variable must be set")
+TASK_NAME = os.getenv("TASK_NAME", "all")
 
 TEMPERATURE  = 0.0
 MAX_TOKENS   = 512
