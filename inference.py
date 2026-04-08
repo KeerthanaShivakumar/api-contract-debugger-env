@@ -49,10 +49,7 @@ if not API_KEY:
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 
 # REQUIRED: Environment server URL (no default)
-ENV_BASE_URL = os.getenv("ENV_BASE_URL")
-if not ENV_BASE_URL:
-    raise ValueError("ENV_BASE_URL environment variable must be set")
-ENV_BASE_URL = ENV_BASE_URL.rstrip("/")
+ENV_BASE_URL = os.getenv("ENV_BASE_URL", "https://keerthanas1011-api-contract-debugger.hf.space")
 
 # REQUIRED: Task name(s) to run (no default)
 TASK_NAME = os.getenv("TASK_NAME")
