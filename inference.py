@@ -199,7 +199,7 @@ def run_episode(client: OpenAI, task_name: str) -> None:
     rewards: List[float] = []
     steps_taken = 0
     success = False
-    score = 0.0
+    score = 0.001  # default: strictly > 0
 
     try:
         obs = env_reset(task_name)
@@ -233,24 +233,18 @@ def run_episode(client: OpenAI, task_name: str) -> None:
             if done:
                 break
 
-        # Get the raw score from the environment (e.g., 0.0 or 1.0)
         raw_score = env_score()
-        
-        # Apply a small epsilon to keep the score strictly between (0, 1)
-        # 0.0 becomes 0.0001 and 1.0 becomes 0.9999
-        epsilon = 0.0001
-        score = max(epsilon, min(1.0 - epsilon, raw_score))
-        
-        # Determine success using the original raw score logic
+        # Clamp strictly between 0 and 1 (exclusive)
+        score = max(0.001, min(0.999, raw_score))
         success = raw_score >= 0.8
-        # --- FIX ENDS HERE ---
 
     except Exception as e:
         print(f"[DEBUG] Episode failed: {e}", flush=True)
-        # Even on failure, ensure the final score is valid (not 0.0)
-        score = 0.0001
+        score = 0.001
         success = False
 
+    finally:
+        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
 # ---------------------------------------------------------------------------
 # Main
