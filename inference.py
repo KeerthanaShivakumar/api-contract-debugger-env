@@ -48,7 +48,7 @@ if not API_KEY:
 # REQUIRED: LOCAL_IMAGE_NAME for docker image initialization (if used)
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 
-# REQUIRED: Environment server URL (no default) - should point to the API contract debugger environment
+# REQUIRED: Environment server URL (no default)
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "https://keerthanas1011-api-contract-debugger.hf.space")
 
 # REQUIRED: Task name(s) to run (no default)
@@ -199,7 +199,7 @@ def run_episode(client: OpenAI, task_name: str) -> None:
     rewards: List[float] = []
     steps_taken = 0
     success = False
-    score = 0.0
+    score = 0.001  # default: strictly > 0
 
     try:
         obs = env_reset(task_name)
@@ -233,12 +233,18 @@ def run_episode(client: OpenAI, task_name: str) -> None:
             if done:
                 break
 
-        score = env_score()
-        success = score >= 0.8
+        raw_score = env_score()
+        # Clamp strictly between 0 and 1 (exclusive)
+        score = max(0.001, min(0.999, raw_score))
+        success = raw_score >= 0.8
+
+    except Exception as e:
+        print(f"[DEBUG] Episode failed: {e}", flush=True)
+        score = 0.001
+        success = False
 
     finally:
         log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
-
 
 # ---------------------------------------------------------------------------
 # Main
